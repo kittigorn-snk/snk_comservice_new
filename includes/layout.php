@@ -14,7 +14,7 @@ function layout_start($title, $active) {
     echo '<meta name="viewport" content="width=device-width, initial-scale=1" />' . "\n";
     echo '<title>' . h($title) . ' | ศูนย์คอมพิวเตอร์ โรงพยาบาลศรีนคร</title>' . "\n";
     echo '<script>(function(){try{var t=localStorage.getItem("snk-theme");if(t==="dark"||(!t&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.className+=" dark";}}catch(e){}})();</script>' . "\n";
-    echo '<link rel="stylesheet" href="assets/css/app.css" />' . "\n";
+    echo '<link rel="stylesheet" href="assets/css/app.css?v=' . @filemtime(dirname(__FILE__) . '/../assets/css/app.css') . '" />' . "\n";
     echo "</head>\n<body>\n";
     echo '<header class="app-header">' . "\n";
     echo '  <div class="container-app header-inner">' . "\n";
@@ -29,14 +29,25 @@ function layout_start($title, $active) {
     echo nav_link('calendar', $active, 'ปฏิทิน', 'index.php?p=calendar');
     if ($user) {
         echo nav_link('reports', $active, 'รายงาน', 'index.php?p=reports');
-        echo nav_link('settings', $active, 'ตั้งค่า', 'index.php?p=settings');
+        $settings_on = ($active == 'settings' || $active == 'job_types' || $active == 'departments');
+        $settings_tab = isset($_GET['tab']) ? $_GET['tab'] : '';
+        echo '<details class="nav-drop" id="settingsDrop">';
+        echo '<summary class="nav-drop-btn' . ($settings_on ? ' active' : '') . '">ตั้งค่าระบบ</summary>';
+        echo '<div class="nav-drop-menu">';
+        echo '<a href="index.php?p=job_types"' . ($active == 'job_types' ? ' class="active"' : '') . '>ประเภทงาน</a>';
+        echo '<a href="index.php?p=departments"' . ($active == 'departments' ? ' class="active"' : '') . '>หน่วยงาน</a>';
+        echo '<a href="index.php?p=settings"' . (($active == 'settings' && $settings_tab != 'users') ? ' class="active"' : '') . '>ข้อตกลงบริการ</a>';
+        if ($user['role'] == 'admin') {
+            echo '<a href="index.php?p=settings&amp;tab=users"' . ($settings_tab == 'users' ? ' class="active"' : '') . '>ผู้ใช้</a>';
+        }
+        echo '</div></details>';
         if ($user['role'] == 'admin') {
             echo nav_link('register', $active, 'สมัครสมาชิก', 'index.php?p=register');
         }
         echo '<span class="nav-user">' . h($user['fullname']) . '</span>';
         echo '<a class="nav-logout" href="index.php?p=logout">ออกจากระบบ</a>';
     } else {
-        echo nav_link('login', $active, 'เจ้าหน้าที่', 'index.php?p=login');
+        echo nav_link('login', $active, 'ผู้ดูแลระบบ', 'index.php?p=login');
     }
     echo '    </nav>' . "\n";
     echo '    <div class="header-actions">' . "\n";
@@ -62,7 +73,7 @@ function layout_end($extra_js = '') {
     echo '</div>' . "\n";
     echo '</main>' . "\n";
     echo '<footer class="app-footer"><div class="container-app">ศูนย์คอมพิวเตอร์ โรงพยาบาลศรีนคร · โทร 055-652725 ต่อ 118</div></footer>' . "\n";
-    echo '<script src="assets/js/app.js"></script>' . "\n";
+    echo '<script src="assets/js/app.js?v=' . @filemtime(dirname(__FILE__) . '/../assets/js/app.js') . '"></script>' . "\n";
     echo $extra_js;
     echo "</body>\n</html>";
 }

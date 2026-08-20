@@ -55,6 +55,16 @@ ready(function () {
     };
   }
 
+  var drop = byId('settingsDrop');
+  if (drop) {
+    document.addEventListener('click', function (e) {
+      var t = e.target || e.srcElement;
+      if (drop.open && t !== drop && !drop.contains(t)) {
+        drop.removeAttribute('open');
+      }
+    });
+  }
+
   enhancePasswordFields();
 
   refreshPending();
