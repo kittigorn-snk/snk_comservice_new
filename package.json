@@ -1,0 +1,10 @@
+{
+  "name": "snk-comservice-new",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i assets/css/src.css -o assets/css/app.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

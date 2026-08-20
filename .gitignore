@@ -1,0 +1,6 @@
+node_modules/
+config/database.php
+assets/css/bootstrap.min.css
+assets/js/bootstrap.bundle.min.js
+
+
