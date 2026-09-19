@@ -4,7 +4,7 @@ require_once dirname(__FILE__) . '/includes/bootstrap.php';
 $p = request_get('p', 'home');
 $allowed = array(
     'home', 'job_form', 'job_list', 'job_view', 'job_print', 'job_export',
-    'calendar', 'reports', 'login', 'logout', 'settings', 'ajax', 'register', 'job_types', 'departments'
+    'calendar', 'reports', 'login', 'logout', 'settings', 'ajax', 'register', 'job_types', 'departments', 'forgot'
 );
 
 if (!in_array($p, $allowed)) {

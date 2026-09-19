@@ -69,6 +69,7 @@ if ($exists && mysqli_num_rows($exists) > 0 && !$force) {
 }
 
 $statements = array(
+    "DROP TABLE IF EXISTS `password_reset_requests`",
     "DROP TABLE IF EXISTS `jobs`",
     "DROP TABLE IF EXISTS `sla_items`",
     "DROP TABLE IF EXISTS `job_types`",
@@ -145,6 +146,19 @@ $statements = array(
       KEY `idx_assignee` (`assignee_id`),
       KEY `idx_priority` (`priority`),
       KEY `idx_category` (`category_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8",
+    "CREATE TABLE `password_reset_requests` (
+      `id` int(10) unsigned NOT NULL auto_increment,
+      `user_id` int(10) unsigned default NULL,
+      `username` varchar(50) NOT NULL,
+      `contact_phone` varchar(30) NOT NULL default '',
+      `note` varchar(255) NOT NULL default '',
+      `status` varchar(20) NOT NULL default 'pending',
+      `created_at` datetime NOT NULL,
+      `handled_at` datetime default NULL,
+      `handled_by` int(10) unsigned default NULL,
+      PRIMARY KEY  (`id`),
+      KEY `idx_status` (`status`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8"
 );
 

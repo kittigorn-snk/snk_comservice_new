@@ -48,11 +48,33 @@ layout_start('ปฏิทินแจ้งงาน', 'calendar');
   $d = 1;
   while ($d <= $days) {
       $iso = sprintf('%04d-%02d-%02d', $year, $month, $d);
-      $cls = ($iso == $today) ? ' cal-cell today' : ' cal-cell';
+      $wday = ($first_w + $d - 1) % 7;
+      $has_jobs = isset($by_day[$d]);
+      $is_ot = ($wday == 0 || $wday == 6) && $has_jobs;
+      $cls = 'cal-cell';
+      if ($is_ot) {
+          $cls .= ' ot';
+      }
+      if ($iso == $today) {
+          $cls .= ' today';
+      }
       echo '<div class="' . $cls . '"><div class="d">' . $d . '</div>';
-      if (isset($by_day[$d])) {
+      if ($has_jobs) {
           foreach ($by_day[$d] as $job) {
-              echo '<a href="index.php?p=job_view&id=' . (int)$job['id'] . '">' . h($job['ticket_no']) . '</a>';
+              $who = trim(preg_replace('/\s+/', ' ', (string)$job['assignee_name']));
+              $first = $who;
+              if ($first != '') {
+                  $parts = explode(' ', $first);
+                  $first = $parts[0];
+              }
+              $label = h($job['ticket_no']);
+              if ($first != '') {
+                  $label .= '<span class="cal-who">' . h($first) . '</span>';
+              }
+              if ($is_ot) {
+                  $label .= '<span class="cal-ot">OT</span>';
+              }
+              echo '<a href="index.php?p=job_view&id=' . (int)$job['id'] . '">' . $label . '</a>';
           }
       }
       echo '</div>';

@@ -42,6 +42,7 @@ layout_start('เข้าสู่ระบบ', 'login');
     </p>
     <button class="btn" type="submit">เข้าสู่ระบบ</button>
   </form>
+  <p class="login-links"><a href="index.php?p=forgot">ลืมรหัสผ่าน</a> — ให้ผู้ดูแลระบบตั้งรหัสใหม่ให้</p>
   <p class="muted" style="margin-top:16px;">การเพิ่มสมาชิกใหม่ทำได้โดยผู้ดูแลระบบเท่านั้น</p>
 </div>
 <?php

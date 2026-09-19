@@ -72,5 +72,34 @@ function db_ready() {
         return false;
     }
     $row = db_one("SHOW TABLES LIKE 'users'");
-    return $row ? true : false;
+    if (!$row) {
+        return false;
+    }
+    schema_ensure_extras();
+    return true;
+}
+
+function schema_ensure_extras() {
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    $row = db_one("SHOW TABLES LIKE 'password_reset_requests'");
+    if ($row) {
+        return;
+    }
+    db_query("CREATE TABLE `password_reset_requests` (
+      `id` int(10) unsigned NOT NULL auto_increment,
+      `user_id` int(10) unsigned default NULL,
+      `username` varchar(50) NOT NULL,
+      `contact_phone` varchar(30) NOT NULL default '',
+      `note` varchar(255) NOT NULL default '',
+      `status` varchar(20) NOT NULL default 'pending',
+      `created_at` datetime NOT NULL,
+      `handled_at` datetime default NULL,
+      `handled_by` int(10) unsigned default NULL,
+      PRIMARY KEY  (`id`),
+      KEY `idx_status` (`status`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8");
 }

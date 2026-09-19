@@ -38,7 +38,12 @@ function layout_start($title, $active) {
         echo '<a href="index.php?p=departments"' . ($active == 'departments' ? ' class="active"' : '') . '>หน่วยงาน</a>';
         echo '<a href="index.php?p=settings"' . (($active == 'settings' && $settings_tab != 'users') ? ' class="active"' : '') . '>ข้อตกลงบริการ</a>';
         if ($user['role'] == 'admin') {
-            echo '<a href="index.php?p=settings&amp;tab=users"' . ($settings_tab == 'users' ? ' class="active"' : '') . '>ผู้ใช้</a>';
+            $reset_n = password_reset_pending_count();
+            $users_label = 'ผู้ใช้';
+            if ($reset_n > 0) {
+                $users_label .= ' (' . $reset_n . ')';
+            }
+            echo '<a href="index.php?p=settings&amp;tab=users"' . ($settings_tab == 'users' ? ' class="active"' : '') . '>' . h($users_label) . '</a>';
         }
         echo '</div></details>';
         if ($user['role'] == 'admin') {

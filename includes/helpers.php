@@ -244,18 +244,27 @@ function sort_controls($page, $id, $show_up, $show_down, $action = '') {
     return $html;
 }
 
+function sort_icon_svg($dir) {
+    if ($dir == 'up') {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>';
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>';
+}
+
 function sort_control_btn($page, $id, $dir, $label, $enabled, $action = '') {
     if ($action == '') {
         $action = 'move';
     }
+    $dir_class = ($dir == 'up') ? 'btn-sort-up' : 'btn-sort-down';
+    $icon = sort_icon_svg($dir);
     if (!$enabled) {
-        return '<button class="btn btn-light btn-sort" type="button" disabled>' . h($label) . '</button>';
+        return '<button class="btn btn-light btn-sort ' . $dir_class . '" type="button" disabled aria-label="' . h($label) . '">' . $icon . '</button>';
     }
     return '<form method="post" action="index.php?p=' . h($page) . '" class="sort-form">'
         . csrf_field()
         . '<input type="hidden" name="action" value="' . h($action) . '" />'
         . '<input type="hidden" name="id" value="' . (int)$id . '" />'
         . '<input type="hidden" name="dir" value="' . h($dir) . '" />'
-        . '<button class="btn btn-light btn-sort" type="submit">' . h($label) . '</button>'
+        . '<button class="btn btn-light btn-sort ' . $dir_class . '" type="submit" aria-label="' . h($label) . '">' . $icon . '</button>'
         . '</form>';
 }

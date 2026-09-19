@@ -236,3 +236,113 @@ function user_create($username, $fullname, $password, $role) {
     }
     return '';
 }
+
+function password_reset_lock_file() {
+    return sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'snk_pwreset_' . md5(auth_client_ip());
+}
+
+function password_reset_is_throttled() {
+    $file = password_reset_lock_file();
+    if (!is_file($file)) {
+        return false;
+    }
+    $data = @file_get_contents($file);
+    $info = $data ? unserialize($data) : false;
+    if (!$info || !isset($info['until'])) {
+        return false;
+    }
+    if (time() < (int)$info['until']) {
+        return true;
+    }
+    @unlink($file);
+    return false;
+}
+
+function password_reset_mark_attempt() {
+    $file = password_reset_lock_file();
+    $info = array('fails' => 0, 'until' => 0);
+    if (is_file($file)) {
+        $old = unserialize(@file_get_contents($file));
+        if (is_array($old)) {
+            $info = $old;
+        }
+    }
+    $info['fails'] = isset($info['fails']) ? ((int)$info['fails'] + 1) : 1;
+    if ($info['fails'] >= 5) {
+        $info['until'] = time() + 900;
+    }
+    @file_put_contents($file, serialize($info));
+}
+
+function password_reset_pending_count() {
+    $row = db_one("SELECT COUNT(*) AS c FROM password_reset_requests WHERE status = 'pending'");
+    return $row ? (int)$row['c'] : 0;
+}
+
+function password_reset_submit($username, $phone, $note) {
+    $username = trim($username);
+    $phone = trim($phone);
+    $note = trim($note);
+    if (strlen($username) < 3 || strlen($username) > 50) {
+        return 'กรุณากรอกชื่อผู้ใช้';
+    }
+    if ($phone == '' || strlen($phone) > 30) {
+        return 'กรุณากรอกเบอร์โทรติดต่อกลับ';
+    }
+    if (strlen($note) > 255) {
+        return 'หมายเหตุยาวเกินไป';
+    }
+    if (password_reset_is_throttled()) {
+        return 'ส่งคำขอหลายครั้งเกินไป กรุณารอ 15 นาที';
+    }
+    $user = db_one("SELECT id, username FROM users WHERE username = '" . db_esc($username) . "'");
+    $user_id = $user ? (int)$user['id'] : 0;
+    $pending = db_one("SELECT id FROM password_reset_requests WHERE username = '" . db_esc($username) . "' AND status = 'pending'");
+    password_reset_mark_attempt();
+    if ($pending) {
+        return '';
+    }
+    $uid_sql = $user_id > 0 ? (string)$user_id : 'NULL';
+    $ok = db_query("INSERT INTO password_reset_requests (user_id, username, contact_phone, note, status, created_at) VALUES ("
+        . $uid_sql . ","
+        . "'" . db_esc($username) . "',"
+        . "'" . db_esc($phone) . "',"
+        . "'" . db_esc($note) . "',"
+        . "'pending','" . now_dt() . "')");
+    if (!$ok) {
+        return 'ไม่สามารถส่งคำขอได้ กรุณาลองใหม่ หรือติดต่อฝ่ายสารสนเทศ 055-652725 ต่อ 118';
+    }
+    return '';
+}
+
+function password_reset_handle($request_id, $action, $new_password, $admin_id) {
+    $request_id = (int)$request_id;
+    $admin_id = (int)$admin_id;
+    $req = db_one("SELECT * FROM password_reset_requests WHERE id = " . $request_id . " AND status = 'pending'");
+    if (!$req) {
+        return 'ไม่พบคำขอ หรือดำเนินการไปแล้ว';
+    }
+    $now = now_dt();
+    if ($action == 'dismiss') {
+        db_query("UPDATE password_reset_requests SET status = 'dismissed', handled_at = '" . $now . "', handled_by = " . $admin_id . " WHERE id = " . $request_id);
+        return '';
+    }
+    if ($action != 'reset') {
+        return 'คำสั่งไม่ถูกต้อง';
+    }
+    $user_id = (int)$req['user_id'];
+    if ($user_id <= 0) {
+        return 'ไม่พบบัญชีผู้ใช้นี้ จึงตั้งรหัสผ่านไม่ได้';
+    }
+    $target = db_one("SELECT * FROM users WHERE id = " . $user_id);
+    if (!$target) {
+        return 'ไม่พบบัญชีผู้ใช้';
+    }
+    $perr = password_validate($new_password, $target['username']);
+    if ($perr != '') {
+        return $perr;
+    }
+    db_query("UPDATE users SET password_hash = '" . db_esc(password_make($new_password)) . "' WHERE id = " . $user_id);
+    db_query("UPDATE password_reset_requests SET status = 'done', handled_at = '" . $now . "', handled_by = " . $admin_id . " WHERE id = " . $request_id);
+    return '';
+}

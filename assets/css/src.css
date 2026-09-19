@@ -398,7 +398,15 @@
   }
 
   .btn-sort {
-    @apply px-2.5 py-1.5 text-xs rounded-lg;
+    @apply inline-flex items-center justify-center px-2 py-1.5 rounded-lg;
+  }
+
+  .btn-sort-up {
+    @apply text-green-500;
+  }
+
+  .btn-sort-down {
+    @apply text-red-500;
   }
 
   .btn-sort:disabled {
@@ -443,8 +451,20 @@
     @apply block text-xs text-royal no-underline dark:text-blue-300;
   }
 
+  .cal-who {
+    @apply block text-[11px] font-normal text-navy-800 dark:text-slate-200;
+  }
+
   .cal-cell.today {
     @apply outline outline-2 outline-royal;
+  }
+
+  .cal-cell.ot {
+    @apply bg-amber-50 border-amber-200 dark:bg-amber-950 dark:border-amber-800;
+  }
+
+  .cal-ot {
+    @apply block text-[10px] font-bold text-amber-800 dark:text-amber-200;
   }
 
   .settings-tabs {
@@ -469,6 +489,22 @@
 
   .muted {
     @apply text-slate-500 dark:text-slate-400;
+  }
+
+  .login-links {
+    @apply mt-4 text-sm;
+  }
+
+  .login-links a {
+    @apply text-royal font-bold no-underline dark:text-blue-300;
+  }
+
+  .reset-req {
+    @apply mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 dark:bg-navy-800 dark:border-amber-900;
+  }
+
+  .reset-req-form {
+    @apply mb-2;
   }
 
   .chart-box {
